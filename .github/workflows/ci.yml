@@ -13,6 +13,16 @@ jobs:
         working-directory: client
 
     steps:
+
+      - name: debug rust/env
+        run: |
+            echo "PATH=$PATH"
+            echo "--- /etc/environment ---"; cat /etc/environment
+            echo "--- .path ---"; cat /home/runner/actions-runner/.path 2>/dev/null || echo "no .path"
+            echo "--- .env ---";  cat /home/runner/actions-runner/.env  2>/dev/null || echo "no .env"
+            ls -la /usr/share/rust/.cargo/bin 2>/dev/null || echo "rust bin not there"
+            command -v rustup || true
+            
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
@@ -28,15 +38,6 @@ jobs:
 
       - name: Check format
         run: yarn check-format
-
-      - name: debug rust/env
-        run: |
-            echo "PATH=$PATH"
-            echo "--- /etc/environment ---"; cat /etc/environment
-            echo "--- .path ---"; cat /home/runner/actions-runner/.path 2>/dev/null || echo "no .path"
-            echo "--- .env ---";  cat /home/runner/actions-runner/.env  2>/dev/null || echo "no .env"
-            ls -la /usr/share/rust/.cargo/bin 2>/dev/null || echo "rust bin not there"
-            command -v rustup || true
 
     
   format_server:
