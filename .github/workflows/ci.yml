@@ -1,17 +1,12 @@
 name: CI
 
 on:
-  push:
-    branches: ["master"]
-  pull_request:
-    branches: ["master"]
-
   workflow_dispatch:
 
 jobs:
   format_client:
     name: Format client
-    runs-on: ubuntu-latest
+    runs-on: monkci-ubuntu-24.04-4
 
     defaults:
       run:
@@ -35,7 +30,7 @@ jobs:
         run: yarn check-format
 
   format_server:
-    runs-on: ubuntu-latest
+    runs-on: monkci-ubuntu-24.04-4
     name: Format server
 
     defaults:
@@ -52,7 +47,7 @@ jobs:
         run: cargo +nightly fmt --check
 
   format_wasm:
-    runs-on: ubuntu-latest
+    runs-on: monkci-ubuntu-24.04-4
     name: Format WASM
 
     defaults:
@@ -66,7 +61,7 @@ jobs:
         run: cargo fmt --check
 
   clippy_server:
-    runs-on: ubuntu-latest
+    runs-on: monkci-ubuntu-24.04-4
     name: Clippy Server
 
     defaults:
@@ -83,7 +78,7 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
 
   clippy_wasm:
-    runs-on: ubuntu-latest
+    runs-on: monkci-ubuntu-24.04-4
     name: Clippy WASM
 
     defaults:
@@ -101,7 +96,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: monkci-ubuntu-24.04-4
     needs:
       [format_client, format_server, format_wasm, clippy_server, clippy_wasm]
 
