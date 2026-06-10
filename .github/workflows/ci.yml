@@ -13,16 +13,12 @@ jobs:
         working-directory: client
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 22
-          cache: yarn
-          cache-dependency-path: client/yarn.lock
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+          cache: "yarn"
+          cache-dependency-path: "client/yarn.lock"
 
       # Always install the version specified in yarn.lock
       - name: Install prettier
@@ -33,82 +29,67 @@ jobs:
       - name: Check format
         run: yarn check-format
 
-      - name: Debug rust/env
-        run: |
-          echo "PATH=$PATH"
-          echo "--- /etc/environment ---"; cat /etc/environment
-          echo "--- .path ---"; cat /home/runner/actions-runner/.path 2>/dev/null || echo "no .path"
-          echo "--- .env ---"; cat /home/runner/actions-runner/.env 2>/dev/null || echo "no .env"
-          ls -la /usr/share/rust/.cargo/bin 2>/dev/null || echo "rust bin not there"
-          command -v rustup || true
-
   format_server:
-    name: Format server
     runs-on: monkci-ubuntu-24.04-4
+    name: Format server
 
     defaults:
       run:
         working-directory: server
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: actions/checkout@v3
 
       - name: Add nightly rustfmt
-        run: rustup component add rustfmt
+        run: rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
 
       - name: Check format
-        run: cargo fmt --check
+        run: cargo +nightly fmt --check
 
   format_wasm:
-    name: Format WASM
     runs-on: monkci-ubuntu-24.04-4
+    name: Format WASM
 
     defaults:
       run:
         working-directory: wasm
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v3
 
       - name: Check format
         run: cargo fmt --check
 
   clippy_server:
-    name: Clippy Server
     runs-on: monkci-ubuntu-24.04-4
+    name: Clippy Server
 
     defaults:
       run:
         working-directory: server
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
+      - name: Add clippy
+        run: rustup component add clippy
 
       - name: Check clippy warnings
         run: cargo clippy --all-targets -- -D warnings
 
   clippy_wasm:
-    name: Clippy WASM
     runs-on: monkci-ubuntu-24.04-4
+    name: Clippy WASM
 
     defaults:
       run:
         working-directory: wasm
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
+      - name: Add clippy
+        run: rustup component add clippy
 
       - name: Check clippy warnings
         run: cargo clippy --all-targets -- -D warnings
@@ -116,36 +97,25 @@ jobs:
   build:
     name: Build
     runs-on: monkci-ubuntu-24.04-4
-
     needs:
-      - format_client
-      - format_server
-      - format_wasm
-      - clippy_server
-      - clippy_wasm
+      [format_client, format_server, format_wasm, clippy_server, clippy_wasm]
 
     defaults:
       run:
         working-directory: client
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 22
-          cache: yarn
-          cache-dependency-path: client/yarn.lock
-
-      - uses: dtolnay/rust-toolchain@stable
+          cache: "yarn"
+          cache-dependency-path: "client/yarn.lock"
 
       - name: Sync rust-toolchain
         run: rustc --version
 
       - uses: Swatinem/rust-cache@v2
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
 
       - name: Setup
         run: yarn setup
