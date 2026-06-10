@@ -30,7 +30,7 @@ jobs:
         run: yarn check-format
 
       - name: debug rust/env
-       run: |
+        run: |
             echo "PATH=$PATH"
             echo "--- /etc/environment ---"; cat /etc/environment
             echo "--- .path ---"; cat /home/runner/actions-runner/.path 2>/dev/null || echo "no .path"
