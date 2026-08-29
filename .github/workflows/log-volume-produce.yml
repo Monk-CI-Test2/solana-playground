@@ -1,0 +1,42 @@
+name: log-volume-probe
+
+on:
+  workflow_dispatch:
+
+jobs:
+  logs:
+    name: Produce large logs
+    runs-on: [self-hosted, akshit-patch-test]
+
+    steps:
+      - name: Live trickle (watch the probe tail this)
+        run: |
+          for i in $(seq 1 30); do echo "tick $i $(date -Ins)"; sleep 1; done
+
+      - name: Chunk 1 (~10 MB)
+        run: |
+          echo "=== CHUNK1 BEGIN ==="
+          awk -v pad="$(printf 'x%.0s' {1..110})" \
+            'BEGIN{for(i=1;i<=80000;i++) printf "chunk1 %06d %s\n", i, pad}'
+          echo "=== CHUNK1 END ==="
+
+      - name: Chunk 2 (~10 MB)
+        run: |
+          echo "=== CHUNK2 BEGIN ==="
+          awk -v pad="$(printf 'x%.0s' {1..110})" \
+            'BEGIN{for(i=1;i<=80000;i++) printf "chunk2 %06d %s\n", i, pad}'
+          echo "=== CHUNK2 END ==="
+
+      - name: Chunk 3 (~10 MB)
+        run: |
+          echo "=== CHUNK3 BEGIN ==="
+          awk -v pad="$(printf 'x%.0s' {1..110})" \
+            'BEGIN{for(i=1;i<=80000;i++) printf "chunk3 %06d %s\n", i, pad}'
+          echo "=== CHUNK3 END ==="
+
+      - name: Totals
+        run: echo "expected 240000 chunk lines + markers"
+
+      # uncomment to test the failed-outcome path
+      # - name: Fail
+      #   run: echo "::error::deliberate failure"; exit 1
